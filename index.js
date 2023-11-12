@@ -57,10 +57,19 @@ bot.on("message", (msg) => {
     }
   } else if (msg.chat.type === "group" || msg.chat.type === "supergroup") {
     if (!user.isHavePremium) {
-      bot.sendMessage(
-        chatId,
-        `Здравствуйте, @${user.nick} !\nДля подачи объявления в группу переходите по ссылке:\n${process.env.REQUISITES_BOT}`
-      );
+      bot
+        .sendMessage(
+          chatId,
+          `Здравствуйте, @${user.nick} !\nДля подачи объявления в группу переходите по ссылке:\n${process.env.REQUISITES_BOT}`
+        )
+        .then((sentMessage) => {
+          const messageId = sentMessage.message_id;
+
+          setTimeout(() => {
+            bot.deleteMessage(chatId, messageId);
+          }, 30000);
+        });
+
       bot.deleteMessage(chatId, msg.message_id);
     }
   }
