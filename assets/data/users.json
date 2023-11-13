@@ -12,5 +12,19 @@
 		"name": "Heso",
 		"isHavePremium": true,
 		"dateBuyedPremium": "2023-12-13T08:32:10.520Z"
+	},
+	{
+		"id": 5998074147,
+		"nick": "andybondorchuk",
+		"name": "Андрей",
+		"isHavePremium": false,
+		"dateBuyedPremium": null
+	},
+	{
+		"id": 6489540606,
+		"nick": "Ivettel43",
+		"name": "Ivette",
+		"isHavePremium": false,
+		"dateBuyedPremium": null
 	}
 ]

@@ -123,6 +123,8 @@ function checkPaymentStatus(query) {
         currentDate.getTime() + 30 * 24 * 60 * 60 * 1000
       );
 
+      console.log(`\n${endDate}\n`)
+
       userWithPaymentId.isHavePremium = true;
       userWithPaymentId.dateBuyedPremium = endDate;
 
@@ -188,6 +190,7 @@ setInterval(() => {
   for (const user of users) {
     if (user.isHavePremium && user.dateBuyedPremium) {
       const endDate = new Date(user.dateBuyedPremium);
+      console.log(user.nick, endDate, currentDate)
 
       if (currentDate >= endDate) {
         user.dateBuyedPremium = null;
