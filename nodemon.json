@@ -1,0 +1,11 @@
+{
+	"ext": "js",
+	"ignore": [
+	  "\\.git",
+	  "node_modules/*",
+	  "public/*",
+	  "npm-debug.log",
+	  "node_modules/.*.*/node_modules",
+	  "*.json"
+	]
+  }

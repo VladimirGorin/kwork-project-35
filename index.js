@@ -57,6 +57,7 @@ bot.on("message", (msg) => {
     }
   } else if (msg.chat.type === "group" || msg.chat.type === "supergroup") {
     if (!user.isHavePremium) {
+      bot.deleteMessage(chatId, msg.message_id);
       bot
         .sendMessage(
           chatId,
@@ -70,7 +71,6 @@ bot.on("message", (msg) => {
           }, 30000);
         });
 
-      bot.deleteMessage(chatId, msg.message_id);
     }
   }
 });
@@ -78,6 +78,13 @@ bot.on("message", (msg) => {
 const handleDocumentSend = (msg) => {
   saveReceipt(msg, bot);
   bot.removeListener("document", handleDocumentSend);
+  bot.removeListener("photo", handlePhotoSend);
+};
+
+const handlePhotoSend = (msg) => {
+  saveReceipt(msg, bot);
+  bot.removeListener("document", handleDocumentSend);
+  bot.removeListener("photo", handlePhotoSend);
 };
 
 function checkPaymentStatus(query) {
@@ -112,8 +119,12 @@ function checkPaymentStatus(query) {
 
     if (userWithPaymentId) {
       const currentDate = new Date();
+      const endDate = new Date(
+        currentDate.getTime() + 30 * 24 * 60 * 60 * 1000
+      );
+
       userWithPaymentId.isHavePremium = true;
-      userWithPaymentId.dateBuyedPremium = currentDate;
+      userWithPaymentId.dateBuyedPremium = endDate;
 
       fs.writeFileSync(
         "./assets/data/users.json",
@@ -122,12 +133,12 @@ function checkPaymentStatus(query) {
 
       bot.sendMessage(
         userWithPaymentId.id,
-        `Подписка проверена и оплачена! Срок действия 30 дней.\nДата покупки ${currentDate}`
+        `Подписка проверена и оплачена! Срок действия 30 дней.\nДата окончания ${endDate}`
       );
 
       bot.sendMessage(
         process.env.ADMIN_ID,
-        `Вы успешно приняли оплату для ${userWithPaymentId.name}!\nПользователю была направлена инструкция\n\nДата покупки: ${currentDate}`
+        `Вы успешно приняли оплату для ${userWithPaymentId.name}!\nПользователю была направлена инструкция\n\nДата окончания: ${endDate}`
       );
     }
   }
@@ -159,15 +170,17 @@ bot.on("callback_query", (msg) => {
 
       bot.sendMessage(chatId, paymentSuccessText);
       bot.on("document", handleDocumentSend);
-
+      bot.on("photo", handlePhotoSend);
       break;
 
     default:
       checkPaymentStatus(query);
-
       break;
   }
 });
+
+bot.on("document", handleDocumentSend);
+bot.on("photo", handlePhotoSend);
 
 setInterval(() => {
   const currentDate = new Date();
@@ -175,7 +188,6 @@ setInterval(() => {
   for (const user of users) {
     if (user.isHavePremium && user.dateBuyedPremium) {
       const endDate = new Date(user.dateBuyedPremium);
-      endDate.setMonth(endDate.getMonth() + 1);
 
       if (currentDate >= endDate) {
         user.dateBuyedPremium = null;
