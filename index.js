@@ -4,7 +4,7 @@ const bot = new TelegramBotApi(process.env.TOKEN, { polling: true });
 const fs = require("fs");
 
 const users = require("./assets/data/users.json");
-const { saveReceipt } = require("./assets/modules/utils");
+const { saveReceipt, writeToLogFile } = require("./assets/modules/utils");
 const commands = JSON.parse(fs.readFileSync("./assets/data/commands.json"));
 
 bot.setMyCommands(commands);
@@ -56,8 +56,10 @@ bot.on("message", (msg) => {
         break;
     }
   } else if (msg.chat.type === "group" || msg.chat.type === "supergroup") {
+    let messageDeleted = false;
     if (!user.isHavePremium) {
       bot.deleteMessage(chatId, msg.message_id);
+      messageDeleted = true;
       bot
         .sendMessage(
           chatId,
@@ -70,8 +72,9 @@ bot.on("message", (msg) => {
             bot.deleteMessage(chatId, messageId);
           }, 30000);
         });
-
     }
+    const generateLogText = `user-chat-id: ${user?.id}, is-have-premium: ${user?.isHavePremium}, message-deleted: ${messageDeleted}, user-name: ${user?.name}, user-nick: ${user?.nick}`;
+    writeToLogFile(generateLogText);
   }
 });
 
@@ -122,8 +125,6 @@ function checkPaymentStatus(query) {
       const endDate = new Date(
         currentDate.getTime() + 30 * 24 * 60 * 60 * 1000
       );
-
-      console.log(`\n${endDate}\n`)
 
       userWithPaymentId.isHavePremium = true;
       userWithPaymentId.dateBuyedPremium = endDate;
@@ -190,7 +191,6 @@ setInterval(() => {
   for (const user of users) {
     if (user.isHavePremium && user.dateBuyedPremium) {
       const endDate = new Date(user.dateBuyedPremium);
-      console.log(user.nick, endDate, currentDate)
 
       if (currentDate >= endDate) {
         user.dateBuyedPremium = null;

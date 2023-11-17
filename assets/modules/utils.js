@@ -108,6 +108,24 @@ function saveReceipt(msg, bot) {
   }
 }
 
+function writeToLogFile(data) {
+  const timestamp = new Date().toLocaleString();
+  
+  const logEntry = `${timestamp}: ${data}\n`;
+  
+  const logFilePath = './assets/data/logfile.log';
+  
+  fs.appendFile(logFilePath, logEntry, (err) => {
+    if (err) {
+      console.error('Ошибка при записи в лог-файл:', err);
+    } else {
+      console.log('Данные успешно записаны в лог-файл.');
+    }
+  });
+}
+
+
 module.exports = {
   saveReceipt,
+  writeToLogFile
 };
